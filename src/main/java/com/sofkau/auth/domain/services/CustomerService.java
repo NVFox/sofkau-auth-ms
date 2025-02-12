@@ -9,6 +9,8 @@ public interface CustomerService {
 
     Customer getCustomer(long id);
 
+    Customer getCustomerByEmail(String email);
+
     Customer updateCustomer(long id, UnaryOperator<Customer> update);
 
     void deleteCustomer(long id);

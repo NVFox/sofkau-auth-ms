@@ -31,6 +31,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Customer getCustomerByEmail(String email) {
+        return customerRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(CUSTOMER_NOT_FOUND));
+    }
+
+    @Override
     public Customer updateCustomer(long id, UnaryOperator<Customer> update) {
         return customerRepository.findById(id)
                 .map(update.andThen(customerRepository::save))
