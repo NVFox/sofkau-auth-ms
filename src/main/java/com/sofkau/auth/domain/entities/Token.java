@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(name = "tokens")
 public class Token {
@@ -22,7 +22,7 @@ public class Token {
     private Customer customer;
 
     @Column(name = "token", unique = true, nullable = false)
-    private String authToken;
+    private String accessToken;
 
     @Column(nullable = false)
     private LocalDateTime issuedAt;
@@ -31,5 +31,14 @@ public class Token {
     private LocalDateTime expiresAt;
 
     @Builder.Default
+    @Column(nullable = false)
     private boolean revoked = false;
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expiresAt);
+    }
+
+    public boolean isValid() {
+        return !isExpired() && customer != null;
+    }
 }

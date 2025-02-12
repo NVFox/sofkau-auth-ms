@@ -9,6 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token, Long> {
-    @Query("SELECT t FROM Token t WHERE t.authToken = ?1")
+    @Query("SELECT t FROM Token t WHERE t.accessToken = ?1 AND t.revoked IS FALSE")
     Optional<Token> findByToken(String token);
+
+    @Query("SELECT t FROM Token t WHERE t.customer.id = ?1 AND t.revoked IS FALSE " +
+            "ORDER BY t.issuedAt DESC LIMIT 1")
+    Optional<Token> findLatestValidToken(long customerId);
 }
