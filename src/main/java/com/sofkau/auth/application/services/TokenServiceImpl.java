@@ -3,6 +3,7 @@ package com.sofkau.auth.application.services;
 import com.sofkau.auth.application.exceptions.NotFoundException;
 import com.sofkau.auth.application.ports.output.TokenProvider;
 import com.sofkau.auth.application.repositories.TokenRepository;
+import com.sofkau.auth.domain.entities.Customer;
 import com.sofkau.auth.domain.entities.Token;
 import com.sofkau.auth.domain.services.CustomerService;
 import com.sofkau.auth.domain.services.TokenService;
@@ -42,6 +43,9 @@ public class TokenServiceImpl implements TokenService {
     }
 
     private Token createToken(long customerId) {
+        Customer customer = customerService
+                .getCustomer(customerId);
+
         String accessToken = tokenProvider
                 .generateToken(String.valueOf(customerId));
 
@@ -55,7 +59,7 @@ public class TokenServiceImpl implements TokenService {
                 .accessToken(accessToken)
                 .issuedAt(issuedAt)
                 .expiresAt(expiresAt)
-                .customer(customerService.getCustomer(customerId))
+                .customer(customer)
                 .build();
 
         return tokenRepository.save(token);

@@ -3,8 +3,6 @@ package com.sofkau.auth.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,7 +26,4 @@ public class Customer {
 
     @Column(nullable = false)
     private String password;
-
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Token> tokens;
 }
