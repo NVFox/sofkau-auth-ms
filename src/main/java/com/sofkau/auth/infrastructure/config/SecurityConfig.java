@@ -1,6 +1,9 @@
 package com.sofkau.auth.infrastructure.config;
 
 import com.sofkau.auth.infrastructure.http.filters.JWTAuthenticationFilter;
+import com.sofkau.auth.infrastructure.http.handlers.TokenEntryPoint;
+import jakarta.servlet.DispatcherType;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,14 +33,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTAuthenticationFilter jwtAuthFilter)
             throws Exception {
         return http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers("/swagger-ui/**", "**/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login", "/customers").permitAll()
-                        .anyRequest().authenticated())
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new TokenEntryPoint()))
+                .authorizeHttpRequests(request -> request
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/customers").permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -55,5 +59,15 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public FilterRegistrationBean<JWTAuthenticationFilter> jwtFilterRegistration(JWTAuthenticationFilter jwtAuthFilter) {
+        FilterRegistrationBean<JWTAuthenticationFilter> registrationBean =
+                new FilterRegistrationBean<>(jwtAuthFilter);
+
+        registrationBean.setEnabled(false);
+
+        return registrationBean;
     }
 }
