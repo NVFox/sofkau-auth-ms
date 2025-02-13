@@ -4,7 +4,9 @@ import com.sofkau.auth.application.dtos.CreateCustomerRequest;
 import com.sofkau.auth.application.dtos.GetCustomerResponse;
 import com.sofkau.auth.application.mappers.CustomerMapper;
 import com.sofkau.auth.application.ports.input.customer.CreateCustomer;
+import com.sofkau.auth.application.ports.output.EventPublisher;
 import com.sofkau.auth.domain.entities.Customer;
+import com.sofkau.auth.domain.events.customer.CustomerCreatedEvent;
 import com.sofkau.auth.domain.services.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,13 +18,19 @@ public class CreateCustomerUseCase implements CreateCustomer {
     private final CustomerService customerService;
     private final CustomerMapper customerMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EventPublisher eventPublisher;
 
     @Override
     public GetCustomerResponse create(CreateCustomerRequest createCustomerRequest) {
-        Customer customer = customerMapper.toConsumer(createCustomerRequest);
+        Customer customer = customerMapper.toConsumer(createCustomerRequest).toBuilder()
+                .password(passwordEncoder.encode(createCustomerRequest.password()))
+                .build();
 
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+        Customer created = customerService.createCustomer(customer);
 
-        return customerMapper.toCustomerResponse(customerService.createCustomer(customer));
+        eventPublisher
+                .publish(new CustomerCreatedEvent(created.getId()));
+
+        return customerMapper.toCustomerResponse(created);
     }
 }
