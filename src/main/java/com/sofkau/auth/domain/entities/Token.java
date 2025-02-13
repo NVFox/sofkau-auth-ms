@@ -35,10 +35,6 @@ public class Token {
     private boolean revoked = false;
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
-    }
-
-    public boolean isValid() {
-        return !isExpired() && customer != null;
+        return !LocalDateTime.now().isBefore(expiresAt);
     }
 }

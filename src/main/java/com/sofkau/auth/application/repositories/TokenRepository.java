@@ -13,6 +13,6 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
     Optional<Token> findByToken(String token);
 
     @Query("SELECT t FROM Token t WHERE t.customer.id = ?1 AND t.revoked IS FALSE " +
-            "ORDER BY t.issuedAt DESC LIMIT 1")
+            "AND CURRENT_TIMESTAMP < t.expiresAt ORDER BY t.issuedAt DESC LIMIT 1")
     Optional<Token> findLatestValidToken(long customerId);
 }

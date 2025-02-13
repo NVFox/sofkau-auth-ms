@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
     protected void doFilterInternal(
@@ -47,7 +49,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
             Token storedToken = tokenService.getToken(token);
 
-            if (!storedToken.isValid()) {
+            if (storedToken.isExpired()) {
                 tokenService.revokeToken(storedToken);
                 throw new NotValidTokenFoundException();
             }
@@ -60,14 +62,14 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+            chain.doFilter(request, response);
         } catch (Exception e) {
             if (e instanceof NotValidTokenFoundException)
                 this.logger.trace("No valid token found in Authorization header");
 
-            this.logger.error(e);
+            handlerExceptionResolver.resolveException(request, response, null, e);
         }
-
-        chain.doFilter(request, response);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
