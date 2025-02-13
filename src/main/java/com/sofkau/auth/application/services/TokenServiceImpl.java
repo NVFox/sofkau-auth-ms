@@ -26,7 +26,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public Token createOrGetToken(long customerId) {
         return tokenRepository.findLatestValidToken(customerId)
-                .orElse(createToken(customerId));
+                .orElseGet(() -> createToken(customerId));
     }
 
     @Override
