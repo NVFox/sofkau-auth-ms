@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/customers").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/verify", "/api/customers").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

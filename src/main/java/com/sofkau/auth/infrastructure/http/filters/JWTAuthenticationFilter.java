@@ -1,5 +1,6 @@
 package com.sofkau.auth.infrastructure.http.filters;
 
+import com.sofkau.auth.application.exceptions.NotFoundException;
 import com.sofkau.auth.application.exceptions.token.NotValidTokenFoundException;
 import com.sofkau.auth.domain.entities.Token;
 import com.sofkau.auth.domain.services.TokenService;
@@ -65,10 +66,15 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
             chain.doFilter(request, response);
         } catch (Exception e) {
+            Exception exception = e;
+
             if (e instanceof NotValidTokenFoundException)
                 this.logger.trace("No valid token found in Authorization header");
 
-            handlerExceptionResolver.resolveException(request, response, null, e);
+            if (e instanceof NotFoundException)
+                exception = new NotValidTokenFoundException();
+
+            handlerExceptionResolver.resolveException(request, response, null, exception);
         }
     }
 
