@@ -66,3 +66,15 @@ jacocoTestReport {
 		}))
 	}
 }
+
+plugins {
+	id "org.sonarqube" version "6.0.1.5171"
+}
+
+sonar {
+	properties {
+		property "sonar.projectKey", "NVFox_sofkau-auth-ms"
+		property "sonar.organization", "nvfox"
+		property "sonar.host.url", "https://sonarcloud.io/"
+	}
+}
