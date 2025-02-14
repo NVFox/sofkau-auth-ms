@@ -91,6 +91,9 @@ class UpdateCustomerUseCaseTest {
 
         verify(passwordEncoder, never())
                 .encode(anyString());
+
+        verify(eventPublisher, times(1))
+                .publish(any());
     }
 
     @Test
@@ -147,6 +150,9 @@ class UpdateCustomerUseCaseTest {
 
         verify(passwordEncoder, times(1))
                 .encode(anyString());
+
+        verify(eventPublisher, times(1))
+                .publish(any());
     }
 
     @Test
@@ -163,5 +169,8 @@ class UpdateCustomerUseCaseTest {
                 .thenThrow(new RuntimeException());
 
         assertThrows(RuntimeException.class, () -> updateCustomerUseCase.update(1L, request));
+
+        verify(eventPublisher, times(1))
+                .publish(any());
     }
 }
