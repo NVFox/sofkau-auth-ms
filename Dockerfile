@@ -1,0 +1,35 @@
+FROM docker.io/library/gradle:8.5-jdk17 AS build
+WORKDIR /app
+COPY --chown=gradle:gradle . .
+RUN gradle clean build -x test
+
+FROM docker.io/library/openjdk:17-jdk
+WORKDIR /app
+
+ARG DB_HOST
+ARG DB_NAME
+ARG DB_PASS
+ARG DB_PORT
+ARG DB_USER
+ARG JWT_EXP_TIME
+ARG JWT_SECRET
+ARG RABBIT_HOST
+ARG RABBIT_PASS
+ARG RABBIT_USER
+ARG RABBIT_PORT
+
+ENV DB_HOST=${DB_HOST}
+ENV DB_NAME=${DB_NAME}
+ENV DB_PASS=${DB_PASS}
+ENV DB_PORT=${DB_PORT}
+ENV DB_USER=${DB_USER}
+ENV JWT_EXP_TIME=${JWT_EXP_TIME}
+ENV JWT_SECRET=${JWT_SECRET}
+ENV RABBIT_HOST=${RABBIT_HOST}
+ENV RABBIT_PASS=${RABBIT_PASS}
+ENV RABBIT_USER=${RABBIT_USER}
+ENV RABBIT_PORT=${RABBIT_PORT}
+
+COPY --from=build /app/build/libs/*.jar /app/app.jar
+EXPOSE 8081
+CMD ["java", "-jar", "/app/app.jar"]
