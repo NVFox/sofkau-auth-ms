@@ -24,23 +24,31 @@ public class LoginUseCase implements Login {
 
     @Override
     public AuthResponse login(AuthLoginRequest authLoginRequest) {
-        Customer customer = customerService
-                .getCustomerByEmail(authLoginRequest.email());
+        try {
+            Customer customer = customerService
+                    .getCustomerByEmail(authLoginRequest.email());
 
-        if (!passwordEncoder.matches(authLoginRequest.password(), customer.getPassword()))
-            throw new BadCredentialsException("Wrong password");
+            if (!passwordEncoder.matches(authLoginRequest.password(), customer.getPassword()))
+                throw new BadCredentialsException("Wrong password");
 
-        Token token = tokenService.createOrGetToken(customer.getId());
+            Token token = tokenService.getValidToken(customer.getId())
+                    .orElseGet(() -> tokenService.createToken(customer.getId()));
 
-        eventPublisher
-                .publish(new CustomerAuthenticatedEvent(customer.getId(), token.getAccessToken()));
+            eventPublisher
+                    .publish(CustomerAuthenticatedEvent.successful(customer.getId(), token.getAccessToken()));
 
-        return new AuthResponse(
-                token.getAccessToken(),
-                customer.getEmail(),
-                customer.getId(),
-                customer.getName(),
-                customer.getDocumentNumber()
-        );
+            return new AuthResponse(
+                    token.getAccessToken(),
+                    customer.getEmail(),
+                    customer.getId(),
+                    customer.getName(),
+                    customer.getDocumentNumber()
+            );
+        } catch (Exception e) {
+            eventPublisher
+                    .publish(CustomerAuthenticatedEvent.failed(authLoginRequest.email()));
+
+            throw e;
+        }
     }
 }

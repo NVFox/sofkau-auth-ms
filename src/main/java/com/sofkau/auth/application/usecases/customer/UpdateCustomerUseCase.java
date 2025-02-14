@@ -4,6 +4,7 @@ import com.sofkau.auth.application.dtos.GetCustomerResponse;
 import com.sofkau.auth.application.dtos.UpdateCustomerRequest;
 import com.sofkau.auth.application.mappers.CustomerMapper;
 import com.sofkau.auth.application.ports.input.customer.UpdateCustomer;
+import com.sofkau.auth.application.ports.output.AuthHandler;
 import com.sofkau.auth.application.ports.output.EventPublisher;
 import com.sofkau.auth.domain.entities.Customer;
 import com.sofkau.auth.domain.events.customer.CustomerUpdatedEvent;
@@ -21,17 +22,28 @@ public class UpdateCustomerUseCase implements UpdateCustomer {
     private final CustomerMapper customerMapper;
     private final PasswordEncoder passwordEncoder;
     private final EventPublisher eventPublisher;
+    private final AuthHandler<Long> authHandler;
 
     public GetCustomerResponse update(long id, UpdateCustomerRequest updateCustomerRequest) {
-        UnaryOperator<Customer> updateWithMapper = customer -> this
-                .updateCustomerWith(customer, updateCustomerRequest);
+        try {
+            return authHandler.authorized(id, () -> {
+                UnaryOperator<Customer> updateWithMapper = customer -> this
+                        .updateCustomerWith(customer, updateCustomerRequest);
 
-        Customer updated = customerService.updateCustomer(id, updateWithMapper);
+                Customer updated = customerService
+                        .updateCustomer(id, updateWithMapper);
 
-        eventPublisher
-                .publish(new CustomerUpdatedEvent(id));
+                eventPublisher
+                        .publish(CustomerUpdatedEvent.successful(updated.getId()));
 
-        return customerMapper.toCustomerResponse(updated);
+                return customerMapper.toCustomerResponse(updated);
+            });
+        } catch (Exception e) {
+            eventPublisher
+                    .publish(CustomerUpdatedEvent.failed(id));
+
+            throw e;
+        }
     }
 
     private Customer updateCustomerWith(Customer customer, UpdateCustomerRequest updateCustomerRequest) {

@@ -22,15 +22,23 @@ public class CreateCustomerUseCase implements CreateCustomer {
 
     @Override
     public GetCustomerResponse create(CreateCustomerRequest createCustomerRequest) {
-        Customer customer = customerMapper.toConsumer(createCustomerRequest).toBuilder()
-                .password(passwordEncoder.encode(createCustomerRequest.password()))
-                .build();
+        try {
+            Customer customer = customerMapper.toConsumer(createCustomerRequest).toBuilder()
+                    .password(passwordEncoder.encode(createCustomerRequest.password()))
+                    .build();
 
-        Customer created = customerService.createCustomer(customer);
+            Customer created = customerService
+                    .createCustomer(customer);
 
-        eventPublisher
-                .publish(new CustomerCreatedEvent(created.getId()));
+            eventPublisher
+                    .publish(CustomerCreatedEvent.successful(created.getId()));
 
-        return customerMapper.toCustomerResponse(created);
+            return customerMapper.toCustomerResponse(created);
+        } catch (Exception e) {
+            eventPublisher
+                    .publish(CustomerCreatedEvent.failed(createCustomerRequest.email()));
+
+            throw e;
+        }
     }
 }

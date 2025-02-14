@@ -1,28 +1,33 @@
 package com.sofkau.auth.domain.events;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Builder
 @Data
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-public class Event {
-    private String recurso;
-    private String idEntidad;
-    private String mensaje;
+public abstract class Event {
+    @JsonProperty("recurso")
+    protected String resource;
 
+    @JsonProperty("idEntidad")
+    protected String resourceId;
+
+    @JsonProperty("mensaje")
+    protected String message;
+
+    @JsonProperty("estado")
     @Builder.Default
-    public LocalDateTime fecha = LocalDateTime.now();
+    protected boolean state = true;
 
-    public Event(String recurso, String idEntidad, String mensaje) {
-        this.recurso = recurso;
-        this.idEntidad = idEntidad;
-        this.mensaje = mensaje;
-        this.fecha = LocalDateTime.now();
-    }
+    @JsonProperty("fecha")
+    @Builder.Default
+    protected LocalDateTime date = LocalDateTime.now();
+
+    public abstract String route();
 }
