@@ -69,11 +69,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./gradlew build sonar --continue --info \
-          -Dsonar.coverage.includes=test/java/com/sofkau/auth/application/services/**, test/java/com/sofkau/auth/application/usecases/auth/**, test/java/com/sofkau/auth/application/usecases/customer/**\
-          -Dsonar.sources=src/main/java \
-          -Dsonar.tests=src/test/java \
-          -Dsonar.exclusions=**/*.json,**/*.png,**/*.md,**/*.txt,**/*.properties,**/*.gradle,**/*.yml,**/test/resources/**
+          ./gradlew build sonar --continue --info 
 
   publish:
     needs: sonar
