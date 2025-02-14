@@ -9,6 +9,7 @@ import com.sofkau.auth.application.ports.input.customer.GetCustomer;
 import com.sofkau.auth.application.ports.input.customer.UpdateCustomer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,6 +27,7 @@ public class CustomerController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public GetCustomerResponse createCustomer(@RequestBody @Valid CreateCustomerRequest createCustomerRequest) {
         return createCustomer.create(createCustomerRequest);
     }
@@ -37,6 +39,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCustomer(@PathVariable long id) {
         deleteCustomer.delete(id);
     }

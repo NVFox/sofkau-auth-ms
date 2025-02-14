@@ -28,8 +28,8 @@ public class LoginUseCase implements Login {
             Customer customer = customerService
                     .getCustomerByEmail(authLoginRequest.email());
 
-            if (!passwordEncoder.matches(authLoginRequest.password(), customer.getPassword()))
-                throw new BadCredentialsException("Wrong password");
+            if (!passwordEncoder.matches(authLoginRequest.pass(), customer.getPassword()))
+                throw new BadCredentialsException("Wrong pass");
 
             Token token = tokenService.getValidToken(customer.getId())
                     .orElseGet(() -> tokenService.createToken(customer.getId()));

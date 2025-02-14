@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GetCustomerResponse(
+        long id,
         String name,
         String email,
         String documentNumber,
