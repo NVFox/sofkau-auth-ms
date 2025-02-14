@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.sofkau.auth.constants.TokenMessageConstants.TOKEN_NOT_FOUND;
 
@@ -25,9 +26,8 @@ public class TokenServiceImpl implements TokenService {
     private final CustomerService customerService;
 
     @Override
-    public Token createOrGetToken(long customerId) {
-        return tokenRepository.findLatestValidToken(customerId)
-                .orElseGet(() -> createToken(customerId));
+    public Optional<Token> getValidToken(long customerId) {
+        return tokenRepository.findLatestValidToken(customerId);
     }
 
     @Override
@@ -42,7 +42,8 @@ public class TokenServiceImpl implements TokenService {
         tokenRepository.save(token);
     }
 
-    private Token createToken(long customerId) {
+    @Override
+    public Token createToken(long customerId) {
         Customer customer = customerService
                 .getCustomer(customerId);
 
