@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 public class RabbitMQEventPublisher implements EventPublisher {
     private final RabbitTemplate rabbitTemplate;
 
-    @Value("${rabbitmq.queue.user}")
-    private String queue;
+    @Value("${rabbitmq.exchange.user-topic}")
+    private String topic;
 
     @Override
     public void publish(Event event) {
-        rabbitTemplate.convertAndSend(queue, event);
+        rabbitTemplate.convertAndSend(topic, event.route(), event);
     }
 }

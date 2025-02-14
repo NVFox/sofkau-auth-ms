@@ -1,28 +1,36 @@
 package com.sofkau.auth.infrastructure.adapters.auth;
 
-import com.sofkau.auth.application.ports.output.AuthProvider;
-import com.sofkau.auth.domain.entities.Customer;
+import com.sofkau.auth.application.ports.output.AuthHandler;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import static com.sofkau.auth.constants.CustomerMessageConstants.CUSTOMER_NOT_AUTHORIZED;
 
 @Service
-public class SpringAuthProvider implements AuthProvider {
+public class SpringAuthHandler implements AuthHandler<Long> {
     @Override
-    public void authorized(Customer customer, Runnable toMake) {
-        if (!isCustomerAuthorized(customer))
+    public void authorized(Long customerId, Runnable toMake) {
+        if (!isCustomerAuthorized(customerId))
             throw new AccessDeniedException(CUSTOMER_NOT_AUTHORIZED);
 
         toMake.run();
     }
 
-    private boolean isCustomerAuthorized(Customer customer) {
+    @Override
+    public <T> T authorized(Long authKey, Supplier<T> toMake) {
+        if (!isCustomerAuthorized(authKey))
+            throw new AccessDeniedException(CUSTOMER_NOT_AUTHORIZED);
+
+        return toMake.get();
+    }
+
+    private boolean isCustomerAuthorized(long customerId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return Objects.equals(auth.getPrincipal(), customer.getId());
+        return Objects.equals(auth.getPrincipal(), customerId);
     }
 }
