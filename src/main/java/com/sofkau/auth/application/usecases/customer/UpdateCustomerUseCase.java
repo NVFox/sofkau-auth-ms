@@ -53,6 +53,6 @@ public class UpdateCustomerUseCase implements UpdateCustomer {
         if (updateCustomerRequest.password() != null)
             updatedCustomer.setPassword(passwordEncoder.encode(updateCustomerRequest.password()));
 
-        return customer;
+        return updatedCustomer;
     }
 }
