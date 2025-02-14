@@ -1,5 +1,6 @@
 package com.sofkau.auth.infrastructure.http.handlers;
 
+import com.sofkau.auth.application.exceptions.AlreadyExistsException;
 import com.sofkau.auth.application.exceptions.NotFoundException;
 import com.sofkau.auth.application.exceptions.token.NotValidTokenFoundException;
 import com.sofkau.auth.infrastructure.http.dtos.ErrorResponse;
@@ -51,6 +52,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         String message = "Se violó una restricción de integridad en la base de datos.";
         ErrorResponse errorResponse = new ErrorResponse("Error de integridad de datos", message);
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleAlreadyExistsException(AlreadyExistsException ex) {
+        ErrorResponse errorResponse = new ErrorResponse("Error: usuario duplicado por email", ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 

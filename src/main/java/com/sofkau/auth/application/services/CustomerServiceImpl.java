@@ -1,5 +1,6 @@
 package com.sofkau.auth.application.services;
 
+import com.sofkau.auth.application.exceptions.AlreadyExistsException;
 import com.sofkau.auth.application.exceptions.NotFoundException;
 import com.sofkau.auth.application.repositories.CustomerRepository;
 import com.sofkau.auth.domain.entities.Customer;
@@ -19,7 +20,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer createCustomer(Customer customer) {
         if (customerRepository.existsByEmail(customer.getEmail()))
-            throw new NotFoundException(CUSTOMER_ALREADY_EXISTS);
+            throw new AlreadyExistsException(CUSTOMER_ALREADY_EXISTS);
 
         return customerRepository.save(customer);
     }
